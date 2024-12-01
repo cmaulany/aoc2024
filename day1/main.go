@@ -5,10 +5,26 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"slices"
 	"strconv"
 )
 
+type input struct {
+	left  []int
+	right []int
+}
+
 func main() {
+	input := load()
+
+	answerPart1 := part1(input)
+	fmt.Printf("Answer part 1: %d\n", answerPart1)
+
+	answerPart2 := part2(input)
+	fmt.Printf("Answer part 2: %d\n", answerPart2)
+}
+
+func load() input {
 	file, _ := os.Open("inputs/day1.txt")
 	defer file.Close()
 
@@ -24,28 +40,36 @@ func main() {
 		left = append(left, lhs)
 		right = append(right, rhs)
 	}
-	// sort.Ints(left)
-	// sort.Ints(right)
+	return input{
+		left:  left,
+		right: right,
+	}
+}
 
-	// fmt.Println(left)
-	// fmt.Println(right)
+func part1(input input) int {
+	slices.Sort(input.left)
+	slices.Sort(input.right)
 	sum := 0
-	for _, n := range left {
-		count := 0
-		for _, m := range right {
+	for i := range input.left {
+		dist := input.right[i] - input.left[i]
+		if dist < 0 {
+			dist = -dist
+		}
+		sum += dist
+	}
+	return sum
+}
+
+func part2(input input) int {
+	sum := 0
+	for _, n := range input.left {
+		appearances := 0
+		for _, m := range input.right {
 			if m == n {
-				count++
+				appearances++
 			}
 		}
-		sum += count * n
+		sum += n * appearances
 	}
-	// for index, _ := range left {
-	// 	dist := right[index] - left[index]
-	// 	if dist < 0 {
-	// 		dist = -dist
-	// 	}
-	// 	sum += dist
-
-	// }
-	fmt.Println((sum))
+	return sum
 }
