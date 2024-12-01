@@ -25,7 +25,7 @@ func main() {
 }
 
 func load() input {
-	file, _ := os.Open("inputs/day1.txt")
+	file, _ := os.Open("inputs/day01.txt")
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
