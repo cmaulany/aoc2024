@@ -29,7 +29,7 @@ func load() input {
 	var input [][]int
 	for scanner.Scan() {
 		line := scanner.Text()
-		match := r.FindAllString(line, 8)
+		match := r.FindAllString(line, -1)
 		var l []int
 		for _, s := range match {
 			n, _ := strconv.Atoi(s)
