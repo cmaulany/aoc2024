@@ -29,7 +29,7 @@ func load() input {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	r, _ := regexp.Compile("\\d+")
+	r := regexp.MustCompile("\\d+")
 	var left []int
 	var right []int
 	for scanner.Scan() {

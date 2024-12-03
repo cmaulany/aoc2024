@@ -23,7 +23,7 @@ func load() string {
 }
 
 func part1(input string) int {
-	r, _ := regexp.Compile("mul\\((\\d+),(\\d+)\\)")
+	r := regexp.MustCompile("mul\\((\\d+),(\\d+)\\)")
 	match := r.FindAllStringSubmatch(input, -1)
 
 	sum := 0
@@ -36,7 +36,7 @@ func part1(input string) int {
 }
 
 func part2(input string) int {
-	r, _ := regexp.Compile("mul\\((\\d+),(\\d+)\\)|do\\(\\)|don't\\(\\)")
+	r := regexp.MustCompile("mul\\((\\d+),(\\d+)\\)|do\\(\\)|don't\\(\\)")
 	match := r.FindAllStringSubmatch(input, -1)
 
 	sum := 0
