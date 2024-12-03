@@ -55,10 +55,10 @@ func part2(input input) int {
 	for _, line := range input {
 	loop:
 		for i := 0; i < len(line); i++ {
-			lineCopy := make([]int, len(line))
-			copy(lineCopy, line)
-			modifiedLine := append(lineCopy[:i], lineCopy[i+1:]...)
-			if isSafe(modifiedLine) {
+			shrunkLine := make([]int, 0, len(line)-1)
+			shrunkLine = append(shrunkLine, line[:i]...)
+			shrunkLine = append(shrunkLine, line[i+1:]...)
+			if isSafe(shrunkLine) {
 				sum++
 				break loop
 			}
