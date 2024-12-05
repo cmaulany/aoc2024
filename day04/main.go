@@ -31,7 +31,7 @@ func load() input {
 	return input
 }
 
-func check(input input, word string, pos [2]int, dir [2]int) bool {
+func checkWord(input input, word string, pos [2]int, dir [2]int) bool {
 	for i, c := range word {
 		x := pos[0] + dir[0]*i
 		y := pos[1] + dir[1]*i
@@ -45,22 +45,36 @@ func check(input input, word string, pos [2]int, dir [2]int) bool {
 	return true
 }
 
+func checkXMas(input input, pos [2]int) bool {
+	x := pos[0]
+	y := pos[1]
+	if !checkWord(input, "MAS", [2]int{x - 1, y - 1}, [2]int{1, 1}) &&
+		!checkWord(input, "MAS", [2]int{x + 1, y + 1}, [2]int{-1, -1}) {
+		return false
+	}
+	if !checkWord(input, "MAS", [2]int{x - 1, y + 1}, [2]int{1, -1}) &&
+		!checkWord(input, "MAS", [2]int{x + 1, y - 1}, [2]int{-1, 1}) {
+		return false
+	}
+	return true
+}
+
 func part1(input input) int {
 	dirs := [8][2]int{
 		{1, 0},
-		{-1, 0},
-		{0, 1},
-		{0, -1},
 		{1, 1},
-		{-1, -1},
-		{1, -1},
+		{0, 1},
 		{-1, 1},
+		{-1, 0},
+		{-1, -1},
+		{0, -1},
+		{1, -1},
 	}
 	sum := 0
 	for y, line := range input {
 		for x := range line {
 			for _, dir := range dirs {
-				if check(input, "XMAS", [2]int{x, y}, dir) {
+				if checkWord(input, "XMAS", [2]int{x, y}, dir) {
 					sum++
 				}
 			}
@@ -73,12 +87,8 @@ func part2(input input) int {
 	sum := 0
 	for y, line := range input {
 		for x := range line {
-			if check(input, "MAS", [2]int{x - 1, y - 1}, [2]int{1, 1}) ||
-				check(input, "MAS", [2]int{x + 1, y + 1}, [2]int{-1, -1}) {
-				if check(input, "MAS", [2]int{x - 1, y + 1}, [2]int{1, -1}) ||
-					check(input, "MAS", [2]int{x + 1, y - 1}, [2]int{-1, 1}) {
-					sum++
-				}
+			if checkXMas(input, [2]int{x - 1, y - 1}) {
+				sum++
 			}
 		}
 	}
