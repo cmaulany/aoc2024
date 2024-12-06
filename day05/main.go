@@ -27,8 +27,8 @@ func main() {
 	answerPart1 := part1(input)
 	fmt.Printf("Answer part 1: %d\n", answerPart1)
 
-	// answerPart2 := part2(input)
-	// fmt.Printf("Answer part 2: %d\n", answerPart2)
+	answerPart2 := part2(input)
+	fmt.Printf("Answer part 2: %d\n", answerPart2)
 }
 
 func load() input {
@@ -70,85 +70,41 @@ func load() input {
 	}
 }
 
-func order(rules []rule, update update) []int {
-	openNs := make([]int, len(update))
-	copy(openNs, update)
-	var openRules []rule
-	for _, rule := range rules {
-		if slices.Contains(openNs, rule.low) && slices.Contains(openNs, rule.high) {
-			openRules = append(openRules, rule)
+func sort(rules []rule, update update) update {
+	updateCopy := make([]int, len(update))
+	copy(updateCopy, update)
+	slices.SortFunc(updateCopy, func(i, j int) int {
+		if slices.ContainsFunc(rules, func(rule rule) bool {
+			return rule.low == i && rule.high == j
+		}) {
+			return -1
+		} else {
+			return 1
 		}
-	}
-
-	var ordered []int
-
-outer:
-	for len(openNs) > 0 {
-	inner:
-		for i := 0; i < len(openNs); i++ {
-			n := openNs[i]
-			// fmt.Println(n)
-			for _, rule := range openRules {
-				if rule.high == n {
-					continue inner
-				}
-			}
-			for j := 0; j < len(openRules); j++ {
-				rule := openRules[j]
-				if rule.low == n {
-					openRules[j] = openRules[len(openRules)-1]
-					openRules = openRules[:len(openRules)-1]
-					j--
-				}
-			}
-			ordered = append(ordered, n)
-
-			openNs[i] = openNs[len(openNs)-1]
-			openNs = openNs[:len(openNs)-1]
-			i--
-			continue outer
-		}
-	}
-	return ordered
+	})
+	return updateCopy
 }
 
 func part1(input input) int {
 	sum := 0
-loop:
 	for _, update := range input.updates {
-		var seen []int
-		valid := true
-		for _, n := range update {
-			seen = append(seen, n)
-			for _, rule := range input.rules {
-				if rule.low == n && slices.Contains(seen, rule.high) {
-					fmt.Println("XX")
-					valid = false
-					ordered := order(input.rules, update)
-					middle := len(update) / 2
-					fmt.Printf("%d %d\n", sum, ordered[middle])
-					sum += ordered[middle]
-					continue loop
-				}
-			}
-		}
-		if valid {
-			middle := len(update) / 2
-			fmt.Println(middle)
-			// sum += update[middle]
+		sorted := sort(input.rules, update)
+		if slices.Equal(update, sorted) {
+			middle := len(sorted) / 2
+			sum += sorted[middle]
 		}
 	}
 	return sum
 }
 
-// func part2(input input) int {
-// 	sum := 0
-// 	for y, line := range input {
-// 		for x := range line {
-// 			if checkXMas(input, [2]int{x - 1, y - 1}) {
-// 				sum++
-// 			}
-// 		}
-// 	}
-// 	return sum
-// }
+func part2(input input) int {
+	sum := 0
+	for _, update := range input.updates {
+		sorted := sort(input.rules, update)
+		if !slices.Equal(update, sorted) {
+			middle := len(sorted) / 2
+			sum += sorted[middle]
+		}
+	}
+	return sum
+}
