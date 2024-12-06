@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sync"
 )
 
 type input = [][]rune
@@ -56,10 +57,7 @@ func tickGuard(input input, g guard) (guard, bool) {
 }
 
 func willLoop(input input) bool {
-	guardPosition := getGuardPosition(input)
-	guardDirection := [2]int{0, -1}
-
-	g := guard{guardPosition, guardDirection}
+	g := getGuard(input)
 	ok := true
 
 	visited := make(map[guard]bool)
@@ -73,22 +71,25 @@ func willLoop(input input) bool {
 	return false
 }
 
-func getGuardPosition(input input) [2]int {
+func getGuard(input input) guard {
 	for y, line := range input {
 		for x, c := range line {
 			if c == '^' {
-				return [2]int{x, y}
+				return guard{
+					[2]int{x, y},
+					[2]int{0, -1},
+				}
 			}
 		}
 	}
-	return [2]int{-1, -1}
+	return guard{
+		[2]int{-1, -1},
+		[2]int{0, 0},
+	}
 }
 
 func part1(input input) int {
-	guardPosition := getGuardPosition(input)
-	guardDirection := [2]int{0, -1}
-
-	g := guard{guardPosition, guardDirection}
+	g := getGuard(input)
 	ok := true
 
 	visited := make(map[[2]int]bool)
@@ -99,26 +100,40 @@ func part1(input input) int {
 	return len(visited)
 }
 
-func part2(input input) int {
-	guardPosition := getGuardPosition(input)
+func addingObstacleWillLoop(input input, position [2]int) bool {
+	inputCopy := make([][]rune, len(input))
+	copy(inputCopy, input)
+	for i := range input {
+		inputCopy[i] = make([]rune, len(input[i]))
+		copy(inputCopy[i], input[i])
+	}
+	inputCopy[position[1]][position[0]] = '#'
+	return willLoop(inputCopy)
+}
 
+func part2(input input) int {
+	g := getGuard(input)
 	sum := 0
+
+	var wg sync.WaitGroup
+	var mu sync.Mutex
 	for y, line := range input {
 		for x, c := range line {
-			if [2]int{x, y} == guardPosition || c == '#' {
-				continue
-			}
-			inputCopy := make([][]rune, len(input))
-			copy(inputCopy, input)
-			for i := range input {
-				inputCopy[i] = make([]rune, len(input[i]))
-				copy(inputCopy[i], input[i])
-			}
-			inputCopy[y][x] = '#'
-			if willLoop(inputCopy) {
-				sum++
-			}
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				if [2]int{x, y} == g.position || c == '#' {
+					return
+				}
+				if addingObstacleWillLoop(input, [2]int{x, y}) {
+					mu.Lock()
+					sum++
+					mu.Unlock()
+				}
+			}()
 		}
 	}
+	wg.Wait()
+
 	return sum
 }
