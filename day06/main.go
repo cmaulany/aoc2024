@@ -36,97 +36,71 @@ func load() input {
 	return input
 }
 
+func tickGuard(input input, g guard) (guard, bool) {
+	nextPosition := [2]int{
+		g.position[0] + g.direction[0],
+		g.position[1] + g.direction[1],
+	}
+	if nextPosition[0] < 0 ||
+		nextPosition[1] < 0 ||
+		nextPosition[0] >= len(input[0]) ||
+		nextPosition[1] >= len(input) {
+		return guard{nextPosition, g.direction}, false
+	}
+	if input[nextPosition[1]][nextPosition[0]] == '#' {
+		nextDirection := [2]int{-g.direction[1], g.direction[0]}
+		return guard{g.position, nextDirection}, true
+	} else {
+		return guard{nextPosition, g.direction}, true
+	}
+}
+
 func willLoop(input input) bool {
-	var guardPosition [2]int
+	guardPosition := getGuardPosition(input)
 	guardDirection := [2]int{0, -1}
 
-loop:
-	for y, line := range input {
-		for x, c := range line {
-			if c == '^' {
-				guardPosition = [2]int{x, y}
-				break loop
-			}
-		}
-	}
+	g := guard{guardPosition, guardDirection}
+	ok := true
 
-	visited := make(map[[2][2]int]bool)
-	// i := 0
-	for true {
-		// i++
-		state := [2][2]int{guardPosition, guardDirection}
-		seen := visited[state]
-		if seen {
+	visited := make(map[guard]bool)
+	for ok {
+		g, ok = tickGuard(input, g)
+		if visited[g] {
 			return true
 		}
-		visited[state] = true
-		nextPosition := [2]int{
-			guardPosition[0] + guardDirection[0],
-			guardPosition[1] + guardDirection[1],
-		}
-		if nextPosition[0] < 0 ||
-			nextPosition[1] < 0 ||
-			nextPosition[0] >= len(input[0]) ||
-			nextPosition[1] >= len(input) {
-			return false
-		}
-		if input[nextPosition[1]][nextPosition[0]] == '#' {
-			guardDirection = [2]int{-guardDirection[1], guardDirection[0]}
-		} else {
-			guardPosition = nextPosition
-		}
+		visited[g] = true
 	}
 	return false
 }
 
-func part1(input input) int {
-	var guardPosition [2]int
-	guardDirection := [2]int{0, -1}
-
-loop:
+func getGuardPosition(input input) [2]int {
 	for y, line := range input {
 		for x, c := range line {
 			if c == '^' {
-				guardPosition = [2]int{x, y}
-				break loop
+				return [2]int{x, y}
 			}
 		}
 	}
+	return [2]int{-1, -1}
+}
+
+func part1(input input) int {
+	guardPosition := getGuardPosition(input)
+	guardDirection := [2]int{0, -1}
+
+	g := guard{guardPosition, guardDirection}
+	ok := true
 
 	visited := make(map[[2]int]bool)
-	for true {
-		visited[guardPosition] = true
-		nextPosition := [2]int{
-			guardPosition[0] + guardDirection[0],
-			guardPosition[1] + guardDirection[1],
-		}
-		if nextPosition[0] < 0 ||
-			nextPosition[1] < 0 ||
-			nextPosition[0] >= len(input[0]) ||
-			nextPosition[1] >= len(input) {
-			break
-		}
-		if input[nextPosition[1]][nextPosition[0]] == '#' {
-			guardDirection = [2]int{-guardDirection[1], guardDirection[0]}
-		} else {
-			guardPosition = nextPosition
-		}
+	for ok {
+		visited[g.position] = true
+		g, ok = tickGuard(input, g)
 	}
 	return len(visited)
 }
 
 func part2(input input) int {
-	var guardPosition [2]int
-
-loop:
-	for y, line := range input {
-		for x, c := range line {
-			if c == '^' {
-				guardPosition = [2]int{x, y}
-				break loop
-			}
-		}
-	}
+	guardPosition := getGuardPosition(input)
 
 	sum := 0
 	for y, line := range input {
