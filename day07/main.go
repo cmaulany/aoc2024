@@ -64,15 +64,15 @@ func concat(a, b int) int {
 	return n
 }
 
-func isSolvable(r equation, operations []operation) bool {
-	if len(r.ns) == 1 {
-		return r.result == r.ns[0]
+func isSolvable(eq equation, operations []operation) bool {
+	if len(eq.ns) == 1 {
+		return eq.result == eq.ns[0]
 	}
 	return slices.ContainsFunc(operations, func(operation operation) bool {
 		return isSolvable(
 			equation{
-				result: r.result,
-				ns:     append([]int{operation(r.ns[0], r.ns[1])}, r.ns[2:]...),
+				result: eq.result,
+				ns:     append([]int{operation(eq.ns[0], eq.ns[1])}, eq.ns[2:]...),
 			},
 			operations,
 		)
