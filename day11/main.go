@@ -31,7 +31,7 @@ func load() []int {
 
 var cache = make(map[[2]int]int)
 
-func countStone(n int, blinkCount int) int {
+func getStoneCount(n int, blinkCount int) int {
 	if blinkCount == 0 {
 		return 1
 	}
@@ -43,13 +43,13 @@ func countStone(n int, blinkCount int) int {
 
 	var result int
 	if n == 0 {
-		result = countStone(1, blinkCount-1)
+		result = getStoneCount(1, blinkCount-1)
 	} else if asString := strconv.Itoa(n); len(asString)%2 == 0 {
 		a, _ := strconv.Atoi(asString[:len(asString)/2])
 		b, _ := strconv.Atoi(asString[len(asString)/2:])
-		result = countStone(a, blinkCount-1) + countStone(b, blinkCount-1)
+		result = getStoneCount(a, blinkCount-1) + getStoneCount(b, blinkCount-1)
 	} else {
-		result = countStone(n*2024, blinkCount-1)
+		result = getStoneCount(n*2024, blinkCount-1)
 	}
 
 	cache[key] = result
@@ -59,7 +59,7 @@ func countStone(n int, blinkCount int) int {
 func part1(input []int) int {
 	sum := 0
 	for _, n := range input {
-		sum += countStone(n, 25)
+		sum += getStoneCount(n, 25)
 	}
 	return sum
 }
@@ -67,7 +67,7 @@ func part1(input []int) int {
 func part2(input []int) int {
 	sum := 0
 	for _, n := range input {
-		sum += countStone(n, 75)
+		sum += getStoneCount(n, 75)
 	}
 	return sum
 }
